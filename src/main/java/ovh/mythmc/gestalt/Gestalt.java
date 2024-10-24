@@ -20,7 +20,7 @@ public class Gestalt {
 
     private final String serverVersion;
 
-    private static Gestalt gestalt = null;
+    private static Gestalt gestalt;
 
     public Gestalt(String serverVersion) {
         this.serverVersion = serverVersion;
@@ -35,7 +35,7 @@ public class Gestalt {
     }
 
     public static void set(final @NotNull Gestalt g) {
-        if (g != null)
+        if (isGestaltInitialized())
             throw new AlreadyInitializedException("Gestalt is already initialized! (is Gestalt properly shaded?)");
 
         gestalt = g;
