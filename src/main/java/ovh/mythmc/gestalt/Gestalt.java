@@ -20,7 +20,7 @@ public class Gestalt {
 
     private final String serverVersion;
 
-    private static Gestalt gestalt;
+    private static Gestalt gestalt = null;
 
     public Gestalt(String serverVersion) {
         this.serverVersion = serverVersion;
