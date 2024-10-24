@@ -44,7 +44,7 @@ public final class FeatureConditionProcessor {
     private static boolean versionCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<String> versions = new ArrayList<>();
 
-        System.out.println(feature.getClass().getDeclaredMethods());
+        System.out.println(feature.getClass().getMethods().toString());
         
         for (Method method : feature.getClass().getDeclaredMethods()) {
             System.out.println(method.getName());
