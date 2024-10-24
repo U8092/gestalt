@@ -28,10 +28,14 @@ public final class FeatureConditionProcessor {
         boolean b = false;
         
         for (Method method : feature.getClass().getMethods()) {
+            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
                 return true;
 
+            System.out.println(method.getName() + " present");
+
             b = (boolean) method.invoke(feature);
+            System.out.println(b);
         }
 
         return b;
@@ -41,9 +45,11 @@ public final class FeatureConditionProcessor {
         List<String> versions = new ArrayList<>();
         
         for (Method method : feature.getClass().getMethods()) {
+            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionVersion.class))
                 return true;
 
+            System.out.println(method.getName() + " present");
             List<?> objectList = (List<?>) method.invoke(feature);
             versions = objectList.stream()
                 .filter(o -> o instanceof String)
@@ -52,6 +58,7 @@ public final class FeatureConditionProcessor {
         }
 
         for (String version : versions) {
+            System.out.println("version " + version);
             if (version.equalsIgnoreCase("ALL") || Gestalt.get().getServerVersion().startsWith(version))
                 return true;
         }
