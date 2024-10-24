@@ -60,8 +60,6 @@ public final class ClassFeature implements IFeature {
         triggerAnnotatedMethod(FeatureShutdown.class);
     }
 
-    private ClassFeature get() { return this; }
-
     protected void triggerAnnotatedMethod(Class<? extends Annotation> annotation) {
         /* 
         Class<?> cl = getAnnotatedClass(annotation);
@@ -70,11 +68,13 @@ public final class ClassFeature implements IFeature {
 
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
+                System.out.println("funciona");
+                /*
                 try {
-                    method.invoke(get());
+                    //method.invoke(instance);
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     e.printStackTrace();
-                }
+                } */
             }
         }
     }
