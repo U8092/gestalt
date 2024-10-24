@@ -14,7 +14,8 @@ public final class FeatureConditionProcessor {
         try {
             return booleanCondition(clazz) && versionCondition(clazz);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            // ignore
+            System.out.println(e);
+            e.printStackTrace();
         }
 
         return false;
@@ -28,6 +29,8 @@ public final class FeatureConditionProcessor {
 
             method.invoke(object);
         }
+
+        System.out.println(object);
 
         if (object instanceof Boolean b)
             return b;
@@ -45,6 +48,8 @@ public final class FeatureConditionProcessor {
 
             method.invoke(object);
         }
+
+        System.out.println(object);
 
         if (object instanceof Collection<?> collection) {
             for (Object o : collection) {
