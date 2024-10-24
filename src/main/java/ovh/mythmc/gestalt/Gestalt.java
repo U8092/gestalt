@@ -97,7 +97,7 @@ public class Gestalt {
     }
 
     public void enableFeature(final @NotNull IFeature feature) {
-        if (FeatureConditionProcessor.canBeEnabled(feature.getClass())) {
+        if (FeatureConditionProcessor.canBeEnabled(feature)) {
             featureMap.put(feature, true);
             feature.enable();
         }

@@ -9,12 +9,13 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.Gestalt;
+import ovh.mythmc.gestalt.features.IFeature;
 
 public final class FeatureConditionProcessor {
 
-    public static boolean canBeEnabled(final @NotNull Class<?> clazz) {
+    public static boolean canBeEnabled(final @NotNull IFeature feature) {
         try {
-            return booleanCondition(clazz) && versionCondition(clazz);
+            return booleanCondition(feature) && versionCondition(feature);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             System.out.println(e);
             e.printStackTrace();
@@ -23,27 +24,27 @@ public final class FeatureConditionProcessor {
         return false;
     }
 
-    private static boolean booleanCondition(final @NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private static boolean booleanCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         boolean b = false;
         
-        for (Method method : clazz.getMethods()) {
+        for (Method method : feature.getClass().getMethods()) {
             if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
                 return true;
 
-            b = (boolean) method.invoke(clazz);
+            b = (boolean) method.invoke(feature);
         }
 
         return b;
     }
 
-    private static boolean versionCondition(final @NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private static boolean versionCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<String> versions = new ArrayList<>();
         
-        for (Method method : clazz.getMethods()) {
+        for (Method method : feature.getClass().getMethods()) {
             if (!method.isAnnotationPresent(FeatureConditionVersion.class))
                 return true;
 
-            List<?> objectList = (List<?>) method.invoke(clazz);
+            List<?> objectList = (List<?>) method.invoke(feature);
             versions = objectList.stream()
                 .filter(o -> o instanceof String)
                 .map(o -> (String) o)
