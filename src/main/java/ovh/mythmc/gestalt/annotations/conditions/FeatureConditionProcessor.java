@@ -27,7 +27,7 @@ public final class FeatureConditionProcessor {
     private static boolean booleanCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         boolean b = false;
         
-        for (Method method : feature.getClass().getMethods()) {
+        for (Method method : feature.getClass().getDeclaredMethods()) {
             System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
                 return true;
@@ -43,8 +43,10 @@ public final class FeatureConditionProcessor {
 
     private static boolean versionCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<String> versions = new ArrayList<>();
+
+        System.out.println(feature.getClass().getDeclaredMethods());
         
-        for (Method method : feature.getClass().getMethods()) {
+        for (Method method : feature.getClass().getDeclaredMethods()) {
             System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionVersion.class))
                 return true;
