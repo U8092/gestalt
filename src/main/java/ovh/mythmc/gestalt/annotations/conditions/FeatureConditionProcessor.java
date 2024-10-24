@@ -2,7 +2,9 @@ package ovh.mythmc.gestalt.annotations.conditions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,46 +24,38 @@ public final class FeatureConditionProcessor {
     }
 
     private static boolean booleanCondition(final @NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        Object object = null;
+        boolean b = false;
+        
         for (Method method : clazz.getMethods()) {
-            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
                 return true;
 
-            method.invoke(object);
+            b = (boolean) method.invoke(clazz);
         }
 
-        System.out.println(object);
-
-        if (object instanceof Boolean b)
-            return b;
-
-        return false;
+        return b;
     }
 
     private static boolean versionCondition(final @NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        boolean supported = false;
+        List<String> versions = new ArrayList<>();
         
-        Object object = null;
         for (Method method : clazz.getMethods()) {
-            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionVersion.class))
                 return true;
 
-            method.invoke(object);
+            List<?> objectList = (List<?>) method.invoke(clazz);
+            versions = objectList.stream()
+                .filter(o -> o instanceof String)
+                .map(o -> (String) o)
+                .collect(Collectors.toList());
         }
 
-        System.out.println(object);
-
-        if (object instanceof Collection<?> collection) {
-            for (Object o : collection) {
-                if (o instanceof String version)
-                    if (version.equalsIgnoreCase("ALL") || Gestalt.get().getServerVersion().startsWith(version))
-                        supported = true;
-            }
+        for (String version : versions) {
+            if (version.equalsIgnoreCase("ALL") || Gestalt.get().getServerVersion().startsWith(version))
+                return true;
         }
 
-        return supported;
+        return false;
     }
 
     

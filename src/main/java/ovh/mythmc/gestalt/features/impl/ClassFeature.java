@@ -69,7 +69,7 @@ public final class ClassFeature implements IFeature {
         for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
                 try {
-                    method.invoke(this);
+                    method.invoke(clazz);
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
