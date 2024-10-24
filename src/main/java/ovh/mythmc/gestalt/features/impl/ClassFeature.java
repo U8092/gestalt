@@ -65,7 +65,7 @@ public final class ClassFeature implements IFeature {
         if (cl == null) return;
 
         for (Method method : cl.getMethods()) {
-            if (method.isAnnotationPresent(FeatureInitialize.class)) {
+            if (method.isAnnotationPresent(annotation)) {
                 try {
                     method.invoke(this);
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
