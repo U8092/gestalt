@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 import org.jetbrains.annotations.ApiStatus.Experimental;
 
-import ovh.mythmc.gestalt.FeaturePriority;
+import ovh.mythmc.gestalt.features.FeaturePriority;
 
 @Experimental
 @Retention(RetentionPolicy.RUNTIME)

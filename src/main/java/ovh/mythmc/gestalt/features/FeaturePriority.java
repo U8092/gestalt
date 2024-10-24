@@ -1,4 +1,4 @@
-package ovh.mythmc.gestalt;
+package ovh.mythmc.gestalt.features;
 
 public enum FeaturePriority {
     HIGHEST,

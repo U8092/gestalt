@@ -12,6 +12,9 @@ import ovh.mythmc.gestalt.annotations.Feature;
 import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
+import ovh.mythmc.gestalt.features.FeaturePriority;
+import ovh.mythmc.gestalt.features.IFeature;
+import ovh.mythmc.gestalt.features.impl.ClassFeature;
 
 public class Gestalt {
 

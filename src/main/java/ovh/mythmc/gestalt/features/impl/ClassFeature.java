@@ -1,4 +1,4 @@
-package ovh.mythmc.gestalt;
+package ovh.mythmc.gestalt.features.impl;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +11,8 @@ import ovh.mythmc.gestalt.annotations.status.FeatureDisable;
 import ovh.mythmc.gestalt.annotations.status.FeatureEnable;
 import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
 import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
+import ovh.mythmc.gestalt.features.FeaturePriority;
+import ovh.mythmc.gestalt.features.IFeature;
 
 public final class ClassFeature implements IFeature {
 
