@@ -61,10 +61,12 @@ public final class ClassFeature implements IFeature {
     }
 
     protected void triggerAnnotatedMethod(Class<? extends Annotation> annotation) {
+        /* 
         Class<?> cl = getAnnotatedClass(annotation);
         if (cl == null) return;
+        */
 
-        for (Method method : cl.getMethods()) {
+        for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
                 try {
                     method.invoke(this);

@@ -24,6 +24,7 @@ public final class FeatureConditionProcessor {
     private static boolean booleanCondition(final @NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Object object = null;
         for (Method method : clazz.getMethods()) {
+            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
                 return true;
 
@@ -43,6 +44,7 @@ public final class FeatureConditionProcessor {
         
         Object object = null;
         for (Method method : clazz.getMethods()) {
+            System.out.println(method.getName());
             if (!method.isAnnotationPresent(FeatureConditionVersion.class))
                 return true;
 
