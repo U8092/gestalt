@@ -29,8 +29,10 @@ public final class FeatureConditionProcessor {
         
         Method[] methods = feature.getClass().getMethods();
         for (Method method : methods) {
+            System.out.println("(b) checking method " + method.getName() + " - class " + feature.getClass().getName());
             if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
                 b = (boolean) method.invoke(feature);
+                System.out.println("(b) " + b);
             } else {
                 return true;
             }
@@ -44,12 +46,14 @@ public final class FeatureConditionProcessor {
         
         Method[] methods = feature.getClass().getMethods();
         for (Method method : methods) {
+            System.out.println("(ver) checking method " + method.getName() + " - class " + feature.getClass().getName());
             if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
                 Collection<?> objectList = (Collection<?>) method.invoke(feature);
                 versions = objectList.stream()
                     .filter(o -> o instanceof String)
                     .map(o -> (String) o)
                     .collect(Collectors.toList());
+                System.out.println(versions);
             }
         }
 
