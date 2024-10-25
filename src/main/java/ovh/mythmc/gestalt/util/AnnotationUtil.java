@@ -1,26 +1,18 @@
 package ovh.mythmc.gestalt.util;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import ovh.mythmc.gestalt.features.IFeature;
 
 public final class AnnotationUtil {
 
-
-    public static void triggerAnnotatedMethod(IFeature instance, Class<? extends Annotation> annotation) {
-        /* 
-        Class<?> cl = getAnnotatedClass(annotation);
-        if (cl == null) return;
-        */
-
-        for (Method method : instance.getClass().getMethods()) {
+    public static void triggerAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
+        for (Method method : clazz.getMethods()) {
             if (method.isAnnotationPresent(annotation)) {
                 System.out.println("funciona");
                 try {
-                    method.invoke(instance);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    method.invoke(clazz.getDeclaredConstructor().newInstance());
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
@@ -28,13 +20,14 @@ public final class AnnotationUtil {
     }
 
     /*
-    protected Class<?> getAnnotatedClass(Class<? extends Annotation> annotation) {
+    public static Class<?> findAnnotationClass(IFeature instance, Class<? extends Annotation> annotation) {
         Class<?> annotatedClass = null;
 
-        Class<?> cl = clazz;
+        Class<?> cl = instance.getClass();
         while (cl != null) {
             if (!cl.isAnnotationPresent(annotation)) {
                 cl = cl.getSuperclass();
+                continue;
             }
 
             annotatedClass = cl;
@@ -42,6 +35,6 @@ public final class AnnotationUtil {
 
         return annotatedClass;
     }
-    */
+         */
     
 }

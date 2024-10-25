@@ -10,11 +10,16 @@ import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.annotations.Feature;
 import ovh.mythmc.gestalt.annotations.conditions.FeatureConditionProcessor;
+import ovh.mythmc.gestalt.annotations.status.FeatureDisable;
+import ovh.mythmc.gestalt.annotations.status.FeatureEnable;
+import ovh.mythmc.gestalt.annotations.status.FeatureInitialize;
+import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
 import ovh.mythmc.gestalt.features.FeaturePriority;
 import ovh.mythmc.gestalt.features.IFeature;
 import ovh.mythmc.gestalt.features.impl.ClassFeature;
+import ovh.mythmc.gestalt.util.AnnotationUtil;
 
 public class Gestalt {
 
@@ -48,65 +53,53 @@ public class Gestalt {
         return gestalt;
     }
 
-    private final Map<IFeature, Boolean> featureMap = new HashMap<>();
-
-    public void register(final @NotNull IFeature... features) {
-        Arrays.stream(features).forEach(feature -> {
-            if (!featureMap.containsKey(feature)) {
-                featureMap.put(feature, false);
-                feature.initialize();
-            }
-        });
-    }
+    // Class, Enabled
+    private final Map<Class<?>, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {
-        Arrays.stream(classes).forEach(cl -> {
-            if (!cl.isAnnotationPresent(Feature.class))
+        Arrays.stream(classes).forEach(clazz -> {
+            if (!clazz.isAnnotationPresent(Feature.class))
                 return;
 
-            ClassFeature feature = new ClassFeature(cl, cl.getAnnotation(Feature.class));
-            register(feature);
-        });
-    }
+            if (classMap.containsKey(clazz))
+                return;
 
-    public void unregister(final @NotNull IFeature... features) {
-        Arrays.stream(features).forEach(feature -> {
-            featureMap.remove(feature);
-            feature.shutdown();
+            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureInitialize.class);
+            classMap.put(clazz, false);
         });
     }
 
     public void unregister(final @NotNull Class<?>... classes) {
-        Arrays.stream(classes).forEach(cl -> {
-            if (!cl.isAnnotationPresent(Feature.class))
+        Arrays.stream(classes).forEach(clazz -> {
+            if (!classMap.containsKey(clazz))
                 return;
 
-            ClassFeature feature = new ClassFeature(cl, cl.getAnnotation(Feature.class)); // temporary
-            unregister(feature);
+            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureShutdown.class);
+            classMap.remove(clazz);
         });
     }
 
     public void unregisterAllFeatures() {
-        for (int i = 0; i < featureMap.keySet().size(); i++) {
-            IFeature feature = featureMap.keySet().stream().toList().get(i);
-            if (!featureMap.get(feature))
-                continue;
-
-            unregister(feature);
+        for (int i = 0; i < classMap.keySet().size(); i++) {
+            Class<?> clazz = classMap.keySet().stream().toList().get(i);
+            unregister(clazz);
         }
     }
 
-    public void enableFeature(final @NotNull IFeature feature) {
-        if (FeatureConditionProcessor.canBeEnabled(feature)) {
-            featureMap.put(feature, true);
-            feature.enable();
+    public void enableFeature(final @NotNull Class<?> clazz) {
+        if (classMap.get(clazz))
+            return;
+
+        if (FeatureConditionProcessor.canBeEnabled(clazz)) {
+            classMap.put(clazz, true);
+            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureEnable.class);
         }
     }
 
-    public void disableFeature(final @NotNull IFeature feature) {
-        if (featureMap.get(feature)) {
-            featureMap.put(feature, false);
-            feature.disable();
+    public void disableFeature(final @NotNull Class<?> clazz) {
+        if (classMap.get(clazz)) {
+            classMap.put(clazz, false);
+            AnnotationUtil.triggerAnnotatedMethod(clazz, FeatureDisable.class);
         }
     }
 
@@ -115,7 +108,7 @@ public class Gestalt {
     }
 
     public void enableAllFeatures(final @NotNull String key) {
-        getSortedByPriority().stream().filter(feature -> feature.key().equals(key)).forEach(this::enableFeature);
+        getSortedByPriority().stream().filter(clazz -> clazz.getAnnotation(Feature.class).key().equals(key)).forEach(this::enableFeature);
     }
 
     public void disableAllFeatures() {
@@ -123,9 +116,38 @@ public class Gestalt {
     }
 
     public void disableAllFeatures(final @NotNull String key) {
-        getSortedByPriority().stream().filter(feature -> feature.key().equals(key)).forEach(this::disableFeature);
+        getSortedByPriority().stream().filter(clazz -> clazz.getAnnotation(Feature.class).key().equals(key)).forEach(this::disableFeature);
     }
 
+    public List<Class<?>> getByKey(final @NotNull String key) {
+        return classMap.keySet().stream()
+            .filter(clazz -> clazz.getAnnotation(Feature.class).key().equals(key))
+            .toList();
+    }
+
+    public List<Class<?>> getByType(final @NotNull String type) {
+        return classMap.keySet().stream()
+            .filter(clazz -> clazz.getAnnotation(Feature.class).type().equals(type))
+            .toList();
+    }
+
+    public List<Class<?>> getByPriority(final @NotNull FeaturePriority priority) {
+        return classMap.keySet().stream()
+            .filter(clazz -> clazz.getAnnotation(Feature.class).priority().equals(priority))
+            .toList();
+    }
+
+    public List<Class<?>> getSortedByPriority() {
+        List<Class<?>> classList = new ArrayList<>();
+        getByPriority(FeaturePriority.HIGHEST).forEach(classList::add);
+        getByPriority(FeaturePriority.HIGH).forEach(classList::add);
+        getByPriority(FeaturePriority.NORMAL).forEach(classList::add);
+        getByPriority(FeaturePriority.LOW).forEach(classList::add);
+        getByPriority(FeaturePriority.LOWEST).forEach(classList::add);
+        return classList;
+    }
+
+    /*
     public List<IFeature> getByKeyAndType(final @NotNull String key, final @NotNull String type) {
         return getByKey(key).stream().filter(feature -> feature.type().equals(type)).toList();
     }
@@ -151,9 +173,10 @@ public class Gestalt {
         getByPriority(FeaturePriority.LOWEST).forEach(featureList::add);
         return featureList;
     }
+         */
 
-    public boolean isEnabled(final @NotNull IFeature feature) {
-        return featureMap.get(feature);
+    public boolean isEnabled(final @NotNull Class<?> clazz) {
+        return classMap.get(clazz);
     }
 
 }

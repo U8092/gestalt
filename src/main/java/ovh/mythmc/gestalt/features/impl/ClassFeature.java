@@ -39,22 +39,22 @@ public final class ClassFeature implements IFeature {
 
     @Override
     public void initialize() {
-        AnnotationUtil.triggerAnnotatedMethod(this, FeatureInitialize.class);
+        //AnnotationUtil.triggerAnnotatedMethod(this, FeatureInitialize.class);
     }
 
     @Override
     public void enable() {
-        AnnotationUtil.triggerAnnotatedMethod(this, FeatureEnable.class);
+        //AnnotationUtil.triggerAnnotatedMethod(this, FeatureEnable.class);
     }
 
     @Override
     public void disable() {
-        AnnotationUtil.triggerAnnotatedMethod(this, FeatureDisable.class);
+        //AnnotationUtil.triggerAnnotatedMethod(this, FeatureDisable.class);
     }
 
     @Override
     public void shutdown() {
-        AnnotationUtil.triggerAnnotatedMethod(this, FeatureShutdown.class);
+        //AnnotationUtil.triggerAnnotatedMethod(this, FeatureShutdown.class);
     }
     
 }

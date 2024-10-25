@@ -9,14 +9,13 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import ovh.mythmc.gestalt.Gestalt;
-import ovh.mythmc.gestalt.features.IFeature;
 
 public final class FeatureConditionProcessor {
 
-    public static boolean canBeEnabled(@NotNull IFeature feature) {
+    public static boolean canBeEnabled(@NotNull Class<?> clazz) {
         try {
-            return booleanCondition(feature) && versionCondition(feature);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            return booleanCondition(clazz) && versionCondition(clazz);
+        } catch (Exception e) {
             System.out.println(e);
             e.printStackTrace();
         }
@@ -24,14 +23,14 @@ public final class FeatureConditionProcessor {
         return false;
     }
 
-    private static boolean booleanCondition(@NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private static boolean booleanCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
         boolean b = false;
         
-        Method[] methods = feature.getClass().getMethods();
+        Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            System.out.println("(b) checking method " + method.getName() + " - class " + feature.getClass().getName());
+            System.out.println("(b) checking method " + method.getName() + " - class " + clazz.getName());
             if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
-                b = (boolean) method.invoke(feature);
+                b = (boolean) method.invoke(clazz.getDeclaredConstructor().newInstance());
                 System.out.println("(b) " + b);
             } else {
                 return true;
@@ -41,14 +40,14 @@ public final class FeatureConditionProcessor {
         return b;
     }
 
-    private static boolean versionCondition(@NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private static boolean versionCondition(@NotNull Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, InstantiationException, NoSuchMethodException, SecurityException {
         Collection<String> versions = new ArrayList<>();
         
-        Method[] methods = feature.getClass().getMethods();
+        Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            System.out.println("(ver) checking method " + method.getName() + " - class " + feature.getClass().getName());
+            System.out.println("(ver) checking method " + method.getName() + " - class " + clazz.getName());
             if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
-                Collection<?> objectList = (Collection<?>) method.invoke(feature);
+                Collection<?> objectList = (Collection<?>) method.invoke(clazz.getDeclaredConstructor().newInstance());
                 versions = objectList.stream()
                     .filter(o -> o instanceof String)
                     .map(o -> (String) o)
