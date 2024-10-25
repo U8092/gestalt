@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,6 @@ import ovh.mythmc.gestalt.annotations.status.FeatureShutdown;
 import ovh.mythmc.gestalt.exceptions.AlreadyInitializedException;
 import ovh.mythmc.gestalt.exceptions.NotInitializedException;
 import ovh.mythmc.gestalt.features.FeaturePriority;
-import ovh.mythmc.gestalt.features.IFeature;
-import ovh.mythmc.gestalt.features.impl.ClassFeature;
 import ovh.mythmc.gestalt.util.AnnotationUtil;
 
 public class Gestalt {
@@ -53,7 +52,6 @@ public class Gestalt {
         return gestalt;
     }
 
-    // Class, Enabled
     private final Map<Class<?>, Boolean> classMap = new HashMap<>();
 
     public void register(final @NotNull Class<?>... classes) {
@@ -137,6 +135,17 @@ public class Gestalt {
             .toList();
     }
 
+    public List<Class<?>> getByKeyAndType(final @NotNull String key, final @NotNull String type) {
+        return getSortedByPriority().stream().filter(clazz -> clazz.getAnnotation(Feature.class).type().equals(type)).toList();
+    }
+
+    public Class<?> getBySimpleClassName(final @NotNull String className) {
+        return classMap.keySet().stream()
+            .filter(clazz -> clazz.getSimpleName().equals(className))
+            .toList()
+            .get(0);
+    }
+
     public List<Class<?>> getSortedByPriority() {
         List<Class<?>> classList = new ArrayList<>();
         getByPriority(FeaturePriority.HIGHEST).forEach(classList::add);
@@ -147,33 +156,13 @@ public class Gestalt {
         return classList;
     }
 
-    /*
-    public List<IFeature> getByKeyAndType(final @NotNull String key, final @NotNull String type) {
-        return getByKey(key).stream().filter(feature -> feature.type().equals(type)).toList();
+    public List<Class<?>> getEnabledClasses() {
+        return classMap.entrySet().stream().filter(entry -> entry.getValue()).map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 
-    public List<IFeature> getByKey(final @NotNull String key) {
-        return featureMap.keySet().stream().filter(feature -> feature.key().equals(key)).toList();
+    public List<Class<?>> getDisabledClasses() {
+        return classMap.entrySet().stream().filter(entry -> !entry.getValue()).map(entry -> entry.getKey()).collect(Collectors.toList());
     }
-
-    public List<IFeature> getByType(final @NotNull String type) {
-        return featureMap.keySet().stream().filter(feature -> feature.type().equals(type)).toList();
-    }    
-
-    public List<IFeature> getByPriority(final @NotNull FeaturePriority priority) {
-        return featureMap.keySet().stream().filter(feature -> feature.priority().equals(priority)).toList();
-    }
-
-    public List<IFeature> getSortedByPriority() {
-        List<IFeature> featureList = new ArrayList<>();
-        getByPriority(FeaturePriority.HIGHEST).forEach(featureList::add);
-        getByPriority(FeaturePriority.HIGH).forEach(featureList::add);
-        getByPriority(FeaturePriority.NORMAL).forEach(featureList::add);
-        getByPriority(FeaturePriority.LOW).forEach(featureList::add);
-        getByPriority(FeaturePriority.LOWEST).forEach(featureList::add);
-        return featureList;
-    }
-         */
 
     public boolean isEnabled(final @NotNull Class<?> clazz) {
         return classMap.get(clazz);
