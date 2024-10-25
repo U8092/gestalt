@@ -3,7 +3,7 @@ package ovh.mythmc.gestalt.annotations.conditions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import ovh.mythmc.gestalt.features.IFeature;
 
 public final class FeatureConditionProcessor {
 
-    public static boolean canBeEnabled(final @NotNull IFeature feature) {
+    public static boolean canBeEnabled(@NotNull IFeature feature) {
         try {
             return booleanCondition(feature) && versionCondition(feature);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -24,43 +24,39 @@ public final class FeatureConditionProcessor {
         return false;
     }
 
-    private static boolean booleanCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private static boolean booleanCondition(@NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         boolean b = false;
         
-        for (Method method : feature.getClass().getDeclaredMethods()) {
-            System.out.println(method.getName());
-            if (!method.isAnnotationPresent(FeatureConditionBoolean.class))
+        Method[] methods = feature.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(FeatureConditionBoolean.class)) {
+                b = (boolean) method.invoke(feature);
+            } else {
                 return true;
-
-            System.out.println(method.getName() + " present");
-
-            b = (boolean) method.invoke(feature);
-            System.out.println(b);
+            }
         }
 
         return b;
     }
 
-    private static boolean versionCondition(final @NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        List<String> versions = new ArrayList<>();
-
-        System.out.println(feature.getClass().getMethods().toString());
+    private static boolean versionCondition(@NotNull IFeature feature) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Collection<String> versions = new ArrayList<>();
         
-        for (Method method : feature.getClass().getDeclaredMethods()) {
-            System.out.println(method.getName());
-            if (!method.isAnnotationPresent(FeatureConditionVersion.class))
-                return true;
-
-            System.out.println(method.getName() + " present");
-            List<?> objectList = (List<?>) method.invoke(feature);
-            versions = objectList.stream()
-                .filter(o -> o instanceof String)
-                .map(o -> (String) o)
-                .collect(Collectors.toList());
+        Method[] methods = feature.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(FeatureConditionVersion.class)) {
+                Collection<?> objectList = (Collection<?>) method.invoke(feature);
+                versions = objectList.stream()
+                    .filter(o -> o instanceof String)
+                    .map(o -> (String) o)
+                    .collect(Collectors.toList());
+            }
         }
 
+        if (versions.isEmpty())
+            return true;
+
         for (String version : versions) {
-            System.out.println("version " + version);
             if (version.equalsIgnoreCase("ALL") || Gestalt.get().getServerVersion().startsWith(version))
                 return true;
         }
